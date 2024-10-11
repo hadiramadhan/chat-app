@@ -8,17 +8,17 @@ import { redirect } from "next/navigation";
 
 async function getUsers(): Promise<User[]> {
   const userKeys: string[] = [];
-  let cursor = "0";
+  let cursor = '0';
   do {
-    const [nextCursor, keys]= await redis.scan(cursor,{match: "user:*", type: "hash", count:100})
+    const [nextCursor, keys]= await redis.scan(cursor,{match: "user:*", type: "hash",})
     cursor = nextCursor
     userKeys.push(...keys)
-  } while (cursor !== "0")
+  } while (cursor != '0')
     const {getUser} = getKindeServerSession()
     const currentUser = await getUser()
-    const pipiline = redis.pipeline()
-    userKeys.forEach(key => pipiline.hgetall(key))
-    const result = (await pipiline.exec()) as User[]
+    const pipeline = redis.pipeline()
+    userKeys.forEach(key => pipeline.hgetall(key))
+    const result = (await pipeline.exec()) as User[]
     const users:User[] = []
     for(const user of result){
       if(user.id !== currentUser.id){
